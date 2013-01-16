@@ -37,7 +37,12 @@ module Doorkeeper
       end
 
       def create_access_token
-        @access_token = Doorkeeper::AccessToken.create!({
+        method = case DOORKEEPER_ORM
+          when :data_mapper then :create
+          else :create!
+        end
+
+        @access_token = Doorkeeper::AccessToken.send(method,{
           :application_id    => refresh_token.application_id,
           :resource_owner_id => refresh_token.resource_owner_id,
           :scopes            => refresh_token.scopes_string,

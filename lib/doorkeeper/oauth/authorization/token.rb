@@ -10,7 +10,11 @@ module Doorkeeper
         end
 
         def issue_token
-          @token ||= AccessToken.create!({
+          method = case DOORKEEPER_ORM
+            when :data_mapper then :create
+            else :create!
+          end
+          @token ||= AccessToken.send(method,{
             :application_id    => pre_auth.client.id,
             :resource_owner_id => resource_owner.id,
             :scopes            => pre_auth.scopes.to_s,

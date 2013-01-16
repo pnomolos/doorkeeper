@@ -8,7 +8,11 @@ Doorkeeper.configure do
   resource_owner_authenticator do
     # Put your resource owner authentication logic here.
     # e.g. User.find_by_id(session[:user_id]) || redirect_to(new_user_session_url)
-    User.find_by_id(session[:user_id]) || redirect_to(root_url, :alert => "Needs sign in.")
+    method = case DOORKEEPER_ORM
+      when :data_mapper then :get
+      else :find_by_id
+    end
+    User.send(method,session[:user_id]) || redirect_to(root_url, :alert => "Needs sign in.")
   end
 
   # If you want to restrict the access to the web interface for

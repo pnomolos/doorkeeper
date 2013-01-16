@@ -78,7 +78,11 @@ module Doorkeeper
       app2 = FactoryGirl.create(:application)
       app2.uid = app1.uid
       expect {
-        app2.save!(:validate => false)
+        method = case DOORKEEPER_ORM
+          when :data_mapper then :save
+          else :save!
+        end
+        app2.send(method, :validate => false)
       }.to raise_error
     end
 

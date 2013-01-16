@@ -7,8 +7,14 @@ module Doorkeeper
   
       def self.included(base)
         base.class_eval do
-          belongs_to :owner, :polymorphic => true
-          validates :owner, :presence => true, :if => :validate_owner?      
+          case DOORKEEPER_ORM
+            when :data_mapper
+              belongs_to :owner, :polymorphic => true, :suffic => :type
+              validates_presence_of :owner, :if => :validate_owner?
+            else
+              belongs_to :owner, :polymorphic => true
+              validates :owner, :presence => true, :if => :validate_owner?
+          end
         end
       end
     end

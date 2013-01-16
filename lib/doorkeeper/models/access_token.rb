@@ -6,25 +6,56 @@ module Doorkeeper
     include Doorkeeper::Models::Accessible
     include Doorkeeper::Models::Scopes
 
-    belongs_to :application, :class_name => "Doorkeeper::Application", :inverse_of => :access_tokens
+    case DOORKEEPER_ORM
+      when :data_mapper
+        property :application_id, Integer, :min => 1, :index => true
+        belongs_to :application, :model => Doorkeeper::Application
+      else
+        belongs_to :application, :class_name => "Doorkeeper::Application", :inverse_of => :access_tokens
+    end
+    
+    present_fields = [:application_id, :token]
+    unique_fields = [:token]
+    
+    case DOORKEEPER_ORM
+      when :data_mapper
+        validates_presence_of(*present_fields)
+        validates_uniqueness_of(*unique_fields)
+        validates_uniqueness_of :refresh_token, :if => :use_refresh_token?
 
-    validates :application_id, :token, :presence => true
-    validates :token, :uniqueness => true
-    validates :refresh_token, :uniqueness => true, :if => :use_refresh_token?
+        before :valid? do |context = :default|
+          return unless new?
+          generate_token
+          generate_refresh_token if use_refresh_token?
+          true
+        end
+
+        def self.authenticate(token)
+          first(:token => token)
+        end
+
+        def self.by_refresh_token(refresh_token)
+          first(:refresh_token => refresh_token)
+        end
+      else
+        validates(*present_fields, :presence => true)
+        validates(*unique_fields, :uniqueness => true)
+        validates :refresh_token, :uniqueness => true, :if => :use_refresh_token?
+
+        before_validation :generate_token, :on => :create
+        before_validation :generate_refresh_token, :on => :create, :if => :use_refresh_token?
+
+        def self.authenticate(token)
+          where(:token => token).first
+        end
+
+        def self.by_refresh_token(refresh_token)
+          where(:refresh_token => refresh_token).first
+        end
+    end
 
     attr_accessor :use_refresh_token
     attr_accessible :application_id, :resource_owner_id, :expires_in, :scopes, :use_refresh_token
-
-    before_validation :generate_token, :on => :create
-    before_validation :generate_refresh_token, :on => :create, :if => :use_refresh_token?
-
-    def self.authenticate(token)
-      where(:token => token).first
-    end
-
-    def self.by_refresh_token(refresh_token)
-      where(:refresh_token => refresh_token).first
-    end
 
     def self.revoke_all_for(application_id, resource_owner)
       delete_all_for(application_id, resource_owner)

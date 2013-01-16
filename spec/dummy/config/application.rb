@@ -9,6 +9,8 @@ Bundler.require :default
 orm = if [:mongoid2, :mongoid3].include?(DOORKEEPER_ORM)
   Mongoid.load!(File.join(File.dirname(File.expand_path(__FILE__)), "#{DOORKEEPER_ORM}.yml"))
   :mongoid
+elsif :data_mapper == DOORKEEPER_ORM
+  :'dm-rails'
 else
   DOORKEEPER_ORM
 end

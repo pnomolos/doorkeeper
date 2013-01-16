@@ -4,7 +4,11 @@ module ModelHelper
   end
 
   def create_resource_owner
-    @resource_owner = User.create!(:name => "Joe", :password => "sekret")
+    method = case DOORKEEPER_ORM
+      when :data_mapper then :create
+      else :create!
+    end
+    @resource_owner = User.send(method, {:name => "Joe", :password => "sekret"})
   end
 
   def authorization_code_exists(options = {})

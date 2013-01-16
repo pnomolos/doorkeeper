@@ -10,13 +10,18 @@ module Doorkeeper
         end
 
         def issue_token
-          @token ||= AccessGrant.create!(
+          method = case DOORKEEPER_ORM
+            when :data_mapper then :create
+            else :create!
+          end
+
+          @token ||= AccessGrant.send(method,{
             :application_id    => pre_auth.client.id,
             :resource_owner_id => resource_owner.id,
             :expires_in        => configuration.authorization_code_expires_in,
             :redirect_uri      => pre_auth.redirect_uri,
             :scopes            => pre_auth.scopes.to_s
-          )
+          })
         end
 
         def configuration

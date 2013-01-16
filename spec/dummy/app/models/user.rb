@@ -18,6 +18,17 @@ when :mongo_mapper
     key :name,     String
     key :password, String
   end
+when :data_mapper
+  require 'dm-rails/mass_assignment_security'
+  class User
+    include DataMapper::Resource
+    include DataMapper::MassAssignmentSecurity
+    
+    property :id, Serial
+    property :name, String
+    property :password, String
+    timestamps :at
+  end
 end
 
 class User
@@ -25,5 +36,13 @@ class User
 
   def self.authenticate!(name, password)
     User.where(:name => name, :password => password).first
+  end
+end
+
+if :data_mapper == DOORKEEPER_ORM
+  class User
+    def self.authenticate!(name, password)
+      User.first(:name => name, :password => password)
+    end
   end
 end

@@ -23,16 +23,16 @@ module Doorkeeper
     end
 
     def show
-      @application = Application.find(params[:id])
+      @application = find_resource(params[:id])
     end
 
     def edit
-      @application = Application.find(params[:id])
+      @application = find_resource(params[:id])
     end
 
     def update
-      @application = Application.find(params[:id])
-      if @application.update_attributes(params[:application])
+      @application = find_resource(params[:id])
+      if update_attributes(@application, params[:application])
         flash[:notice] = I18n.t(:notice, :scope => [:doorkeeper, :flash, :applications, :update])
         respond_with [:oauth, @application]
       else
@@ -41,9 +41,33 @@ module Doorkeeper
     end
 
     def destroy
-      @application = Application.find(params[:id])
+      @application = find_resource(params[:id])
       flash[:notice] = I18n.t(:notice, :scope => [:doorkeeper, :flash, :applications, :destroy]) if @application.destroy
       redirect_to oauth_applications_url
+    end
+    
+    private
+    def find_resource(id)
+      Application.find(id)
+    end
+    
+    def update_attributes(model, attributes)
+      model.update_attributes(attributes)
+    end
+  end
+end
+
+if :data_mapper == DOORKEEPER_ORM
+  module Doorkeeper
+    class ApplicationsController
+      private
+      def find_resource(id)
+        Application.get(id)
+      end
+      
+      def update_attributes(model, attributes)
+        model.update(attributes)
+      end
     end
   end
 end

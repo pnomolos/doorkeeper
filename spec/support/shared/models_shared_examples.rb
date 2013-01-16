@@ -14,7 +14,13 @@ end
 
 shared_examples "a revocable token" do
   describe :accessible? do
-    before { subject.save! }
+    before do 
+      method = case DOORKEEPER_ORM
+        when :data_mapper then :save
+        else :save!
+      end
+      subject.send(method)
+    end
 
     it "is accessible if token is not revoked" do
       subject.should be_accessible
@@ -53,7 +59,11 @@ shared_examples "an unique token" do
       token2 = FactoryGirl.create factory_name
       token2.token = token1.token
       expect {
-        token2.save!(:validate => false)
+        method = case DOORKEEPER_ORM
+          when :data_mapper then :save
+          else :save!
+        end
+        token2.send(method, :validate => false)
       }.to raise_error
     end
   end

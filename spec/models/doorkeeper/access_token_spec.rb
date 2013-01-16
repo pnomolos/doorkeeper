@@ -3,7 +3,6 @@ require 'spec_helper_integration'
 module Doorkeeper
   describe AccessToken do
     subject { FactoryGirl.build(:access_token) }
-
     it { should be_valid }
 
     it_behaves_like "an accessible token"
