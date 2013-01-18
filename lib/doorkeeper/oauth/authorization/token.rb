@@ -10,7 +10,7 @@ module Doorkeeper
         end
 
         def issue_token
-          method = case DOORKEEPER_ORM
+          method = case Doorkeeper.configuration.orm_name
             when :data_mapper then :create
             else :create!
           end

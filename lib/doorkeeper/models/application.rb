@@ -2,7 +2,7 @@ module Doorkeeper
   class Application
     include Doorkeeper::OAuth::Helpers
 
-    case DOORKEEPER_ORM
+    case Doorkeeper.configuration.orm_name
       when :data_mapper
         has n, :access_grants, :constraint => :destroy, :model => Doorkeeper::AccessGrant
         has n, :access_tokens, :constraint => :destroy, :model => Doorkeeper::AccessToken
@@ -14,7 +14,7 @@ module Doorkeeper
     present_fields = [:name, :secret, :uid, :redirect_uri]
     unique_fields = [:uid]
 
-    case DOORKEEPER_ORM
+    case Doorkeeper.configuration.orm_name
       when :data_mapper
         validates_presence_of(*present_fields)
         validates_uniqueness_of(*unique_fields)
@@ -37,7 +37,7 @@ module Doorkeeper
       ::ActiveModel::Name.new(self, Doorkeeper, 'Application')
     end
   
-    case DOORKEEPER_ORM
+    case Doorkeeper.configuration.orm_name
       when :data_mapper
         def self.authenticate(uid, secret)
           first(:uid => uid, :secret => secret)

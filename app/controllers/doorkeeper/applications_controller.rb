@@ -57,7 +57,7 @@ module Doorkeeper
   end
 end
 
-if :data_mapper == DOORKEEPER_ORM
+if :data_mapper == Doorkeeper.configuration.orm_name
   module Doorkeeper
     class ApplicationsController
       private

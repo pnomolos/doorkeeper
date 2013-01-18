@@ -6,7 +6,7 @@ module Doorkeeper
     include Doorkeeper::Models::Accessible
     include Doorkeeper::Models::Scopes
     
-    case DOORKEEPER_ORM
+    case Doorkeeper.configuration.orm_name
       when :data_mapper
         belongs_to :application, :model => Doorkeeper::Application
       else
@@ -18,7 +18,7 @@ module Doorkeeper
     present_fields = [:resource_owner_id, :application_id, :token, :expires_in, :redirect_uri]
     unique_fields = [:token]
     
-    case DOORKEEPER_ORM
+    case Doorkeeper.configuration.orm_name
       when :data_mapper
         validates_presence_of(*present_fields)
         validates_uniqueness_of(*unique_fields)

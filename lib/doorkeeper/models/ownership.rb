@@ -7,7 +7,7 @@ module Doorkeeper
   
       def self.included(base)
         base.class_eval do
-          case DOORKEEPER_ORM
+          case Doorkeeper.configuration.orm_name
             when :data_mapper
               belongs_to :owner, :polymorphic => true, :suffic => :type
               validates_presence_of :owner, :if => :validate_owner?

@@ -59,7 +59,7 @@ module Doorkeeper::OAuth
     end
 
     def create_access_token
-      method = case DOORKEEPER_ORM
+      method = case Doorkeeper.configuration.orm_name
         when :data_mapper then :create
         else :create!
       end
